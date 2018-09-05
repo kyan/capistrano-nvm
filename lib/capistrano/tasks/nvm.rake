@@ -11,8 +11,12 @@ namespace :nvm do
       nvm_node_path = [nvm_node_path] unless nvm_node_path.is_a?(Array)
 
       unless test(nvm_node_path.map {|p| "[ -d #{p} ]" }.join(" || "))
-        error "nvm: #{nvm_node} is not installed or not found in any of #{nvm_node_path.join(" ")}"
-        exit 1
+        upload! StringIO.new("#!/bin/bash -e\nsource \"#{fetch(:nvm_path)}/nvm.sh\"\nnvm install $NODE_VERSION\nexec \"$@\"")
+
+        unless test(nvm_node_path.map {|p| "[ -d #{p} ]" }.join(" || "))
+          error "nvm: #{nvm_node} is not installed or not found in any of #{nvm_node_path.join(" ")}"
+          exit 1
+        end
       end
     end
   end
